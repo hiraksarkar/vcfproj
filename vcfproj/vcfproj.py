@@ -248,7 +248,7 @@ def projection(GTF_FILE, VCF_FILE):
         print('there is no intersection with the VCF...exiting')
         return None
 
-    print('Merging the cromosome...')
+    print('Merging the chromosomes...')
 
     vcf_gtf = pd.concat(dataframes)
     vcf_gtf['relative_pos'] = vcf_gtf['pos'] - vcf_gtf['start']
@@ -261,17 +261,17 @@ def projection(GTF_FILE, VCF_FILE):
 
     return(vcf_gtf[
         [
-            'CHROM_x',
+            'chrom_x',
             'gene',
             'txome',
             'relative_pos',
             'transcript_length',
-            'ID',
-            'REF',
-            'ALT',
-            'QUAL',
-            'FILTER',
-            'INFO',
+            'id',
+            'ref',
+            'alt',
+            'qual',
+            'filter',
+            'info',
             'format',
             'samples'
         ]
