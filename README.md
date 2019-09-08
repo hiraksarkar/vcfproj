@@ -14,3 +14,29 @@ from vcfproj import vcfproj
 vcf_gtf = vcfproj.projection(GTF_FILE, VCF_FILE)
 
 ```
+
+`vcf_gtf` is a dataframe, that would contain the following columns 
+```
+[
+
+'chrom_x', - chromosome of variation 
+'start', - start of transcript
+'end', - end of transcript
+'gene', - gene name
+'txome', - transcript name
+'vcf_index', - ignore
+'relative_pos', - relative position of variation on transcript
+'transcript_length', - length of transcript
+'chrom_y', - same as chrom_x
+'pos', - position of variation
+'id', - ID
+'ref', - REF
+'alt', - ALT
+'qual', - QUAL
+'filter', - FILTER
+'info', - INFO
+'format', - FORMAT
+'samples' - SAMPLES 
+
+]
+```

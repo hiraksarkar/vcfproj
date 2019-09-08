@@ -139,7 +139,7 @@ def tiny_vcf_reader(resource):
     return records
 
 
-def projection(GTF_FILE, VCF_FILE):
+def projection(GTF_FILE, VCF_FILE, chrom_set = set()):
     """
     Projects VCF file to transcript coordinates.
     Creates intermediate file ``
@@ -148,6 +148,7 @@ def projection(GTF_FILE, VCF_FILE):
     ----------
     GTF_FILE : string containing GTF file name, assumed to be unzipped
     VCF_FILE : string containing VCF file name, can be a gzipped file 
+    chrom_set : set() set of chromosomes to be sampled 
 
     Returns
     -------
@@ -208,10 +209,11 @@ def projection(GTF_FILE, VCF_FILE):
     if(retval):
         print('can\'t delete the intermediate file')
 
-    chromosomes = set(gtf_df.chrom.values)
+    if len(chrom_set) == 0:
+        chrom_set = set(gtf_df.chrom.values)
     dataframes = []
 
-    for i in chromosomes:
+    for i in chrom_set:
         gtf_df_subset = gtf_df.loc[gtf_df.chrom == i]
         df_subset = df.loc[df.chrom == i]
 
@@ -265,6 +267,7 @@ def projection(GTF_FILE, VCF_FILE):
     #        'chrom_x',
     #        'gene',
     #        'txome',
+    #
     #        'relative_pos',
     #        'transcript_length',
     #        'id',
