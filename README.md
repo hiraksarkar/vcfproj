@@ -4,6 +4,11 @@ The program uses ncls, a fast interval tree search program
 that considerably speeds up the ''stabbing'' problem of 
 finding out the variant that overlaps the transcriptome interval. 
 
+Install using 
+`pip install vcfproj`
+
+Run as follows
+
 ```
 
 GTF_FILE = 'Mus_musculus.GRCm38.91.gtf'
@@ -15,7 +20,7 @@ vcf_gtf = vcfproj.projection(GTF_FILE, VCF_FILE)
 
 ```
 
-`vcf_gtf` is a dataframe, that would contain the following columns 
+The output `vcf_gtf` is a dataframe, that would contain the following columns 
 ```
 [
 
