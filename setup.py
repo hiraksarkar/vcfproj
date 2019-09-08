@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="vcfproj",
-    version="0.0.1",
+    version="0.0.2",
     author="Hirak Sarkar",
     author_email="hsarkar@umd.edu",
     description="Project vcf level coordinates from chromosomes to transcript",
