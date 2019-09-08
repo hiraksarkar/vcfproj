@@ -4,6 +4,7 @@ import pandas as pd
 
 from collections import namedtuple
 import re
+import io
 
 import gzip
 import bz2
@@ -30,6 +31,16 @@ GENOTYPE_UNPHASED = '/'
 GENOTYPE_PHASED = '|'
 
 REGEX_ALT = re.compile("(^[A|C|G|T]+)")
+
+def read_vcf(path):
+    with open(path, 'r') as f:
+        lines = [l for l in f if not l.startswith('##')]
+    return pd.read_csv(
+        io.StringIO(''.join(lines)),
+        dtype={'#CHROM': str, 'POS': int, 'ID': str, 'REF': str, 'ALT': str,
+               'QUAL': str, 'FILTER': str, 'INFO': str},
+        sep='\t'
+    ).rename(columns={'#CHROM': 'CHROM'})
 
 def parse_vcf_line(line):
     """
@@ -127,6 +138,7 @@ def tiny_vcf_reader(resource):
     print('end parsing vcf file with ',count, ' lines')
     return records
 
+
 def projection(GTF_FILE, VCF_FILE):
     """
     Projects VCF file to transcript coordinates.
@@ -156,15 +168,20 @@ def projection(GTF_FILE, VCF_FILE):
         'samples'
     ]
 
-    call it truncated VCF 
+    call it truncated VCF
     """
+
     from timeit import default_timer as timer
 
+    start = timer()
+    # records = read_vcf(VCF_FILE)
+    records = tiny_vcf_reader(VCF_FILE)
+    df = pd.DataFrame(records, columns=VCF_FIELDS)
+    end = timer()
+
+    print('parsed vcf in', (end - start), 'seconds')
 
     start = timer()
-
-    records = tiny_vcf_reader(VCF_FILE)
-
     # Create a minimal for GTF
     import sys
     import subprocess
@@ -182,7 +199,7 @@ def projection(GTF_FILE, VCF_FILE):
         sys.exit(1)
 
     gtf_df = pd.read_csv(
-        'chrom_gene_tr.info',
+        'chrome_gene_tr.info',
         sep = ' ',
         names = ['chrom', 'start', 'end', 'gene', 'txome'],
         header = None
@@ -196,15 +213,15 @@ def projection(GTF_FILE, VCF_FILE):
 
     for i in chromosomes:
         gtf_df_subset = gtf_df.loc[gtf_df.chrom == i]
-        df_subset = df.loc[df.chrom == i]
+        df_subset = df.loc[df.CHROM == i]
 
         start_val = gtf_df.loc[gtf_df.chrom == i].start.values
         end_val = gtf_df.loc[gtf_df.chrom == i].end.values
         indices = gtf_df.loc[gtf_df.chrom == i].index.values
 
-        query_start_val = df.loc[df.chrom == i].pos.values
-        query_end_val = df.loc[df.chrom == i].pos.values + 1
-        query_indices = df.loc[df.chrom == i].index.values
+        query_start_val = df.loc[df.CHROM == i].POS.values
+        query_end_val = df.loc[df.CHROM == i].POS.values + 1
+        query_indices = df.loc[df.CHROM == i].POS.values
 
         ncls = NCLS(np.array(start_val), np.array(end_val), indices)
         result = ncls.all_overlaps_both(query_start_val, query_end_val, query_indices)
@@ -224,7 +241,7 @@ def projection(GTF_FILE, VCF_FILE):
     print('Merging the cromosome...')
 
     vcf_gtf = pd.concat(dataframes)
-    vcf_gtf['relative_pos'] = vcf_gtf['pos'] - vcf_gtf['start']
+    vcf_gtf['relative_pos'] = vcf_gtf['POS'] - vcf_gtf['start']
     vcf_gtf['transcript_length'] = vcf_gtf['end'] - vcf_gtf['start'] + 1
 
 
@@ -234,17 +251,17 @@ def projection(GTF_FILE, VCF_FILE):
 
     return(vcf_gtf[
         [
-            'chrom_x',
+            'CHROM_x',
             'gene',
             'txome',
             'relative_pos',
             'transcript_length',
-            'id',
-            'ref',
-            'alt',
-            'qual',
-            'filter',
-            'info',
+            'ID',
+            'REF',
+            'ALT',
+            'QUAL',
+            'FILTER',
+            'INFO',
             'format',
             'samples'
         ]
