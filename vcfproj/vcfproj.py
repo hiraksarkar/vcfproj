@@ -259,20 +259,21 @@ def projection(GTF_FILE, VCF_FILE):
 
     print('elapsed ',(end - start)," seconds")
 
-    return(vcf_gtf[
-        [
-            'chrom_x',
-            'gene',
-            'txome',
-            'relative_pos',
-            'transcript_length',
-            'id',
-            'ref',
-            'alt',
-            'qual',
-            'filter',
-            'info',
-            'format',
-            'samples'
-        ]
-    ])
+    return(vcf_gtf)
+    #return(vcf_gtf[
+    #    [
+    #        'chrom_x',
+    #        'gene',
+    #        'txome',
+    #        'relative_pos',
+    #        'transcript_length',
+    #        'id',
+    #        'ref',
+    #        'alt',
+    #        'qual',
+    #        'filter',
+    #        'info',
+    #        'format',
+    #        'samples'
+    #    ]
+    #])
