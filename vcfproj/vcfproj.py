@@ -213,19 +213,26 @@ def projection(GTF_FILE, VCF_FILE):
 
     for i in chromosomes:
         gtf_df_subset = gtf_df.loc[gtf_df.chrom == i]
-        df_subset = df.loc[df.CHROM == i]
+        df_subset = df.loc[df.chrom == i]
+
+        if(not len(df_subset)):
+            continue
 
         start_val = gtf_df.loc[gtf_df.chrom == i].start.values
         end_val = gtf_df.loc[gtf_df.chrom == i].end.values
         indices = gtf_df.loc[gtf_df.chrom == i].index.values
 
-        query_start_val = df.loc[df.CHROM == i].POS.values
-        query_end_val = df.loc[df.CHROM == i].POS.values + 1
-        query_indices = df.loc[df.CHROM == i].POS.values
+        query_start_val = df.loc[df.chrom == i].pos.values
+        query_end_val = df.loc[df.chrom == i].pos.values + 1
+        query_indices = df.loc[df.chrom == i].index.values
 
         ncls = NCLS(np.array(start_val), np.array(end_val), indices)
         result = ncls.all_overlaps_both(query_start_val, query_end_val, query_indices)
         map_df = pd.DataFrame(list(zip(*result)), columns= ['vcf_index' , 'gtf_index'])
+
+        if(not len(map_df)):
+            continue
+
         vcf_gtf_subset = pd.merge(
             gtf_df_subset.join(map_df.set_index('gtf_index')),
             df_subset,
@@ -237,11 +244,14 @@ def projection(GTF_FILE, VCF_FILE):
         dataframes += [vcf_gtf_subset]
         print('chromosome ',i,' done')
 
+    if(not len(dataframes)):
+        print('there is no intersection with the VCF...exiting')
+        return None
 
     print('Merging the cromosome...')
 
     vcf_gtf = pd.concat(dataframes)
-    vcf_gtf['relative_pos'] = vcf_gtf['POS'] - vcf_gtf['start']
+    vcf_gtf['relative_pos'] = vcf_gtf['pos'] - vcf_gtf['start']
     vcf_gtf['transcript_length'] = vcf_gtf['end'] - vcf_gtf['start'] + 1
 
 
