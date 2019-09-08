@@ -101,7 +101,7 @@ def tiny_vcf_reader(resource):
 
     # skip header
     df = pd.DataFrame(columns=VCF_FIELDS)
-    current_line = next(reader)x
+    current_line = next(reader)
 
     while current_line.startswith('##'):
         current_line = next(reader)
@@ -115,16 +115,22 @@ def tiny_vcf_reader(resource):
 
     records = []
     count = 0
+    print('parsing vcf ', resource, '..')
+    import sys
+    sys.stdout.flush()
     for line in reader:
         record = parse_vcf_line(line)
         print(count, end = '\r')
+        count += 1
         records += [record]
 
+    print('end parsing vcf file with ',count, ' lines')
     return records
 
 def projection(GTF_FILE, VCF_FILE):
     """
     Projects VCF file to transcript coordinates.
+    Creates intermediate file ``
 
     Parameters
     ----------
@@ -158,6 +164,33 @@ def projection(GTF_FILE, VCF_FILE):
     start = timer()
 
     records = tiny_vcf_reader(VCF_FILE)
+
+    # Create a minimal for GTF
+    import sys
+    import subprocess
+    cmd = [
+        'cat',GTF_FILE,
+        '| awk -F \"\t\" \'($3 == \"transcript\") {print $1,$4,$5,$9}\'',
+        '| tr -d \";\\"\"',
+        '| awk \'{print $1,$2,$3,$5,$9}\' > chrome_gene_tr.info'
+    ]
+    print('running ...')
+    print(' '.join(cmd))
+    retval = subprocess.call(' '.join(cmd), shell=True)
+    if(retval):
+        print('awk commant failed')
+        sys.exit(1)
+
+    gtf_df = pd.read_csv(
+        'chrom_gene_tr.info',
+        sep = ' ',
+        names = ['chrom', 'start', 'end', 'gene', 'txome'],
+        header = None
+    )
+    retval = subprocess.call('rm chrome_gene_tr.info', shell=True)
+    if(retval):
+        print('can\'t delete the intermediate file')
+
     chromosomes = set(gtf_df.chrom.values)
     dataframes = []
 
